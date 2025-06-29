@@ -72,3 +72,9 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Remove start content
+Content/StarterContent/*
+
+# Remove developer plugins
+Plugins/Developer/*
