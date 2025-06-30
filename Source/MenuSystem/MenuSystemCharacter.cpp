@@ -252,7 +252,7 @@ void AMenuSystemCharacter::OnFindSessionsComplete(bool bWasSuccessful)
 				GEngine->AddOnScreenDebugMessage(
 					-1,
 					15.0f,
-					FColor::Red,
+					FColor::Blue,
 					FString::Printf(TEXT("Id: %s, User: %s"), *Id, *User));
 			}
 
@@ -263,11 +263,17 @@ void AMenuSystemCharacter::OnFindSessionsComplete(bool bWasSuccessful)
 					GEngine->AddOnScreenDebugMessage(
 						-1,
 						15.0f,
-						FColor::Red,
+						FColor::Yellow,
 						FString::Printf(TEXT("Joining match type: %s"), *MatchType));
 				}
 
 				OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
+				
+				// Steam complains about bUseLobbiesIfAvailable and bUsesPresence must match
+				// so changing these in the results, which should NOT be needed!
+				// Joining fails otherwise, though, so doing it for now.
+				Result.Session.SessionSettings.bUseLobbiesIfAvailable = true;
+				Result.Session.SessionSettings.bUsesPresence = true;
 
 				const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 				OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Result);
