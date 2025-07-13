@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Interfaces/OnlineSessionInterface.h"
+#include "StaticData.h"
 #include "Menu.generated.h"
 
 class UButton;
@@ -17,11 +19,20 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOffMatch = FString(TEXT("FreeForAll")));
+	void MenuSetup(int32 NumberOfPublicConnections = 4, EMultiplayerSubsystemMatchType TypeOfMatch = EMultiplayerSubsystemMatchType::DeathMatch, FString LobbyPath = FString(TEXT("/Game/ThirdPersonCPP/Maps/Lobby?listen")));
 
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
+	
+	UFUNCTION()
+	void OnCreateSession(bool bWasSuccessful);
+	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+	void OnJoinSession(EOnJoinSessionCompleteResult::Type Result);
+	UFUNCTION()
+	void OnDestroySession(bool bWasSuccessful);
+	UFUNCTION()
+	void OnStartSession(bool bWasSuccessful);
 
 private:
 	void MenuTearDown();
@@ -39,8 +50,11 @@ private:
 	void JoinButtonClicked();
 
 	// The subsystem to handle all online session functionality
+	UPROPERTY()
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
 	int32 NumPublicConnections{4};
-	FString MatchType{TEXT("FreeForAll")};
+	EMultiplayerSubsystemMatchType MatchType{EMultiplayerSubsystemMatchType::DeathMatch};
+
+	FString PathToLobby{TEXT("")}; 
 };
