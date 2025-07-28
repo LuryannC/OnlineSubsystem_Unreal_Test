@@ -22,8 +22,5 @@ public:
 	TArray<FName> CompletedMissionIDs;
 	
 	UPROPERTY()
-	TArray<UMissionAsset*> CompletedMissionAssets;
-
-	UPROPERTY()
 	TArray<FMissionStruct> OnGoingMissionsProgress;
 };

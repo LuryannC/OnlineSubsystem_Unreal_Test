@@ -5,7 +5,7 @@
 #include "MissionRewardSettings.h"
 #include "MissionRewardSystemLog.h"
 
-void UMissionBase::InitialiseMission(const UMissionAsset* InMissionAsset)
+void UMissionBase::InitialiseMission(UMissionAsset* InMissionAsset)
 {
 	check(InMissionAsset);
 	MissionAsset = InMissionAsset;
@@ -13,7 +13,7 @@ void UMissionBase::InitialiseMission(const UMissionAsset* InMissionAsset)
 	RuntimeConditions.Empty();
 
 	// Register conditions to complete
-	for (const FMissionCondition& Condition : MissionAsset->Conditions)
+	for (const FMissionCondition& Condition : MissionAsset->MissionData.Conditions)
 	{
 		FRuntimeCondition Runtime;
 		Runtime.EventTag = Condition.EventTag;
@@ -33,6 +33,16 @@ void UMissionBase::InitialiseMission(UMissionBase* InMission)
 	MissionAsset = InMission->GetMissionAssetData();
 	
 	ShowMissionDebugData();
+}
+
+UMissionAsset* UMissionBase::GetMissionAssetData() const
+{
+	if (!MissionAsset)
+	{
+		UE_LOG(MissionRewardSystemLog, Error, TEXT(" UMissionBase::GetMissionAssetData - Invalid mission Asset."));
+		return nullptr;
+	}
+	return MissionAsset;
 }
 
 void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amount)
@@ -55,7 +65,7 @@ void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amo
 		// Exact match is cheapest; Although MatchesTag allow for hierarchy support EventTag.MatchesTag(RC.EventTag)
 		if (EventTag.MatchesTagExact(RC.EventTag))
 		{
-				const int32 Old = RC.Current;
+			const int32 Old = RC.Current;
 			RC.Current = FMath::Clamp(RC.Current + Amount, 0, RC.Target);
 			if (RC.Current != Old)
 			{
@@ -84,17 +94,18 @@ void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amo
 		if (RC.Current < RC.Target)
 		{
 			bAllComplete = false;
-			UE_LOG(MissionRewardSystemLog, Display, TEXT("UMissionBase::OnGameplayEvent - Condition %s no met. Current: %i - Target %i"), *RC.EventTag.ToString(), RC.Current, RC.Target);
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionBase::OnGameplayEvent - Condition %s no met. Current: %i - Target %i"), *RC.EventTag.ToString(), RC.Current, RC.Target);
 		}
 	}
 
 	OnProgressUpdated.Broadcast(this);
 
-	UE_LOG(MissionRewardSystemLog, Display, TEXT("UMissionBase::OnGameplayEvent - Gameplay event fired for %s with %i amount"), *EventTag.ToString(), Amount);
+	UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionBase::OnGameplayEvent - Gameplay event fired for %s with %i amount"), *EventTag.ToString(), Amount);
 
 	if (bAllComplete)
 	{
 		bIsCompleted = true;
+		MissionAsset->MissionData.bIsCompleted = true;
 		OnMissionCompleted.Broadcast(this);
 	}
 
@@ -114,16 +125,18 @@ void UMissionBase::ShowMissionDebugData()
 	{
 		if (Settings->bShowDebugMessages)
 		{
-			UE_LOG(MissionRewardSystemLog, Display, TEXT("---------------- MISSION ----------------"));
-			UE_LOG(MissionRewardSystemLog, Display, TEXT("Mission: %s"), *MissionAsset->MissionID.ToString());
-			UE_LOG(MissionRewardSystemLog, Display, TEXT("Num of Conditions: %i"), RuntimeConditions.Num());
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("---------------- MISSION ----------------"));
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission: %s"), *MissionAsset->MissionData.MissionID.ToString());
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Num of Conditions: %i"), RuntimeConditions.Num());
 			for (const auto& Condition : RuntimeConditions)
 			{
-				UE_LOG(MissionRewardSystemLog, Display, TEXT("Condition: %s | Current: %i | Target: %i"), *Condition.EventTag.ToString(), Condition.Current, Condition.Target);
+				UE_LOG(MissionRewardSystemLog, Log, TEXT("Condition: %s | Current: %i | Target: %i"), *Condition.EventTag.ToString(), Condition.Current, Condition.Target);
 			}
-			UE_LOG(MissionRewardSystemLog, Display, TEXT("Mission completed: %hs"), bIsCompleted ? ("True") : ("False"));
-			UE_LOG(MissionRewardSystemLog, Display, TEXT("-----------------------------------------"));
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission completed: %hs"), bIsCompleted ? ("True") : ("False"));
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("-----------------------------------------"));
 		}
 	}
 #endif
 }
+
+

@@ -50,14 +50,13 @@ public:
 
 	/* Get all active missions */
 	UFUNCTION(BlueprintCallable)
-	const TArray<UMissionBase*>& GetActiveMissions() const { return ActiveMissions; }
+	const TArray<UMissionBase*>& GetActiveMissions() const;
 
-	/* Get all completed mission assets
-	 * This is useful to access mission data, such as:
-	 * MissionID, DisplayName, Description, etc...
-	 */
 	UFUNCTION(BlueprintCallable)
-	TArray<UMissionAsset*> GetCompletedMissionsAssets() const { return CompletedMissionAssets; }
+	TArray<FMissionStruct> GetAllAvailableMissionsData() const { return AvailableMissions; }
+	
+	UFUNCTION(BlueprintCallable)
+	FMissionStruct GetMissionData(const FName MissionId) const;
 
 	/* Get the mission IDs (FName) of every completed mission */
 	UFUNCTION(BlueprintCallable)
@@ -103,8 +102,8 @@ private:
 	TArray<FName> CompletedMissionIDs;
 	
 	UPROPERTY()
-	TArray<UMissionAsset*> CompletedMissionAssets;
+	TArray<FMissionStruct> OnGoingMissionsProgress;
 
 	UPROPERTY()
-	TArray<FMissionStruct> OnGoingMissionsProgress;
+	TArray<FMissionStruct> AvailableMissions;
 };

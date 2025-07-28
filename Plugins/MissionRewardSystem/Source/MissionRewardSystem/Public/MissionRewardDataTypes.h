@@ -2,8 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Engine/DataTable.h"
 #include "MissionRewardDataTypes.generated.h"
+
+class URewardBase;
 
 UENUM(BlueprintType)
 enum EUnlockReasonFailReason : uint8
@@ -46,14 +47,41 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly)
-	FName MissionID = FName();
+	FMissionStruct() {}
+	FMissionStruct(const FName InMissionID, const TArray<FRuntimeCondition>& InConditionProgress)
+	{
+		MissionID = InMissionID;
+		ConditionsProgress = InConditionProgress;
+	}
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName MissionID;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FText DisplayName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FText Description;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UTexture2D> Icon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FMissionCondition> Conditions;
+
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rewards")
+	// TArray<TSoftObjectPtr<URewardBase>> Rewards = TArray<TSoftObjectPtr<URewardBase>>();
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<FRuntimeCondition> ConditionsProgress = TArray<FRuntimeCondition>();
+	TArray<FRuntimeCondition> ConditionsProgress;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsCompleted = false;
 
 	bool operator==(const FMissionStruct& Other) const
 	{
 		return MissionID == Other.MissionID;
 	}
+
+	
 };

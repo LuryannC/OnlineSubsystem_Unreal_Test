@@ -6,41 +6,45 @@
 #include "MissionRewardDataTypes.h"
 #include "Engine/DataAsset.h"
 #include "RewardBase.h"
+#include "Engine/PrimaryAssetLabel.h"
 #include "MissionAsset.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MISSIONREWARDSYSTEM_API UMissionAsset : public UPrimaryDataAsset
+class MISSIONREWARDSYSTEM_API UMissionAsset : public UPrimaryDataAsset 
 {
 	GENERATED_BODY()
 
 public:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Asset Settings")
-	FPrimaryAssetType DataType;
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Asset Settings")
+	// FPrimaryAssetType DataType;
+	//
+	// virtual FPrimaryAssetId GetPrimaryAssetId() const override
+	// {
+	// 	return FPrimaryAssetId(DataType, GetFName());
+	// }
 
-	virtual FPrimaryAssetId GetPrimaryAssetId() const override
-	{
-		return FPrimaryAssetId(DataType, GetFName());
-	}
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FMissionStruct MissionData;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName MissionID = FName();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FText DisplayName = FText();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FText Description = FText();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSoftObjectPtr<UTexture2D> Icon = TSoftObjectPtr<UTexture2D>();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FMissionCondition> Conditions = TArray<FMissionCondition>();
-
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Rewards")
-    TArray<TObjectPtr<URewardBase>> Rewards = TArray<TObjectPtr<URewardBase>>();
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// FName MissionID = FName();
+ //
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// FText DisplayName = FText();
+ //
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// FText Description = FText();
+ //
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// TSoftObjectPtr<UTexture2D> Icon = TSoftObjectPtr<UTexture2D>();
+ //
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	// TArray<FMissionCondition> Conditions = TArray<FMissionCondition>();
+ //
+	// UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Rewards")
+ //    TArray<TObjectPtr<URewardBase>> Rewards = TArray<TObjectPtr<URewardBase>>();
 };

@@ -15,17 +15,17 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMissionCompleted, UMissionBase*, Mi
 /**
  * 
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Blueprintable)
 class MISSIONREWARDSYSTEM_API UMissionBase : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void InitialiseMission(const UMissionAsset* InMissionAsset);
+	void InitialiseMission(UMissionAsset* InMissionAsset);
 	void InitialiseMission(UMissionBase* InMission);
 
 	UFUNCTION(BlueprintCallable)
-	const UMissionAsset* GetMissionAssetData() const { return MissionAsset; }
+	UMissionAsset* GetMissionAssetData() const;
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FRuntimeCondition> GetRuntimeConditions() { return RuntimeConditions; }
@@ -47,7 +47,7 @@ public:
 private:
 
 	UPROPERTY()
-	const UMissionAsset* MissionAsset;
+	UMissionAsset* MissionAsset;
 	
 	TArray<FRuntimeCondition> RuntimeConditions;
 
