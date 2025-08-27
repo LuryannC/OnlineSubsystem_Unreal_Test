@@ -7,12 +7,12 @@
 class URewardBase;
 
 UENUM(BlueprintType)
-enum EUnlockReasonFailReason : uint8
+enum class EUnlockReasonFailReason : uint8
 {
-	NotFound,
-	AlreadyCompleted,
-	Unknown,
-	Success,
+	NotFound         UMETA(DisplayName="Not Found"),
+	AlreadyCompleted UMETA(DisplayName="Already Completed"),
+	Unknown          UMETA(DisplayName="Unknown"),
+	Success          UMETA(DisplayName="Success"),
 };
 
 USTRUCT(BlueprintType)
@@ -21,7 +21,7 @@ struct MISSIONREWARDSYSTEM_API FMissionCondition
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="Event"))
-	FGameplayTag EventTag = FGameplayTag();
+	FGameplayTag EventTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 TargetCount = 1;
@@ -47,21 +47,38 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 {
 	GENERATED_BODY()
 
-	FMissionStruct() {}
-	FMissionStruct(const FName InMissionID, const TArray<FRuntimeCondition>& InConditionProgress)
-	{
-		MissionID = InMissionID;
-		ConditionsProgress = InConditionProgress;
-	}
+	FMissionStruct() = default;
+
+	FMissionStruct(const FMissionStruct& Other)
+	: MissionID(Other.MissionID)
+	// , DisplayName(Other.DisplayName)
+	// , Description(Other.Description)
+	, Icon(Other.Icon)
+	, Conditions(Other.Conditions)
+	, Rewards(Other.Rewards)
+	, ConditionsProgress(Other.ConditionsProgress)
+	, bIsCompleted(Other.bIsCompleted)
+	{}
+
+	// FMissionStruct(const FName InMissionID, const TArray<FRuntimeCondition>& InConditionProgress)
+	// : MissionID(InMissionID)
+	// , DisplayName()
+	// , Description()
+	// , Icon(nullptr)
+	// , Conditions()
+	// , Rewards()
+	// , ConditionsProgress(InConditionProgress)
+	// , bIsCompleted(false)
+	// {}
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName MissionID;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText DisplayName;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText Description;
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	// FString DisplayName;
+	//
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	// FString Description;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
@@ -69,8 +86,8 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FMissionCondition> Conditions;
 
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rewards")
-	// TArray<TSoftObjectPtr<URewardBase>> Rewards = TArray<TSoftObjectPtr<URewardBase>>();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rewards")
+	TArray<TSoftClassPtr<URewardBase>> Rewards;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FRuntimeCondition> ConditionsProgress;
@@ -83,5 +100,19 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 		return MissionID == Other.MissionID;
 	}
 
-	
+	// FMissionStruct& operator=(const FMissionStruct& Other)
+	// {
+	// 	if (this != &Other)
+	// 	{
+	// 		MissionID = Other.MissionID;
+	// 		DisplayName = Other.DisplayName;
+	// 		Description = Other.Description;
+	// 		Icon = Other.Icon;
+	// 		Conditions = Other.Conditions;
+	// 		Rewards = Other.Rewards;
+	// 		ConditionsProgress = Other.ConditionsProgress;
+	// 		bIsCompleted = Other.bIsCompleted;
+	// 	}
+	// 	return *this;
+	// }
 };

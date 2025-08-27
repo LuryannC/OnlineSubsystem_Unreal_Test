@@ -18,5 +18,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Reward")
 	int32 Amount = 100;
 
-	virtual bool GrantReward_Implementation(APlayerController* Recipient) override;
+	virtual bool GrantReward_Implementation() override;
 };

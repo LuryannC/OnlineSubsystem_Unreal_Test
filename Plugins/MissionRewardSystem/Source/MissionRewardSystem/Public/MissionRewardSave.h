@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "MissionRewardDataTypes.h"
 #include "GameFramework/SaveGame.h"
-#include "MissionAsset.h"
+#include "MissionsAsset.h"
 #include "MissionRewardSave.generated.h"
 
 class UMissionBase;

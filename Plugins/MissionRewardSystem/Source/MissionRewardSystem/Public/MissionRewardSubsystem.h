@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "MissionBase.h"
-#include "MissionAsset.h"
+#include "MissionsAsset.h"
 #include "MissionRewardDataTypes.h"
 #include "MissionRewardSave.h"
 #include "Runtime/Engine/Public/Subsystems/GameInstanceSubsystem.h"
@@ -33,7 +33,7 @@ public:
 
 	/* Method to give mission at runtime */
 	UFUNCTION()
-	void GrantMission(UMissionAsset* InMissionAsset, bool bAllowDuplicates = true);
+	void GrantMission(UMissionBase* InMission, bool bAllowDuplicates = true);
 
 	/* Method to call whenever a gameplay event that has mission bound to it happen*/
 	UFUNCTION(BlueprintCallable)
@@ -42,7 +42,7 @@ public:
 	/* Load assets set in the plugin settings, such as:
 	 * Individual missions data asset and Seasonal missions data asset. 
 	 */
-	void LoadMissionAssets(const TArray<UMissionAsset*>& Assets);
+	void PreInitMissions(const TArray<UMissionsAsset*>& Assets);
 
 	/* In case developer wants to override the values, like retrieving from a cloud save. */
 	UFUNCTION(BlueprintCallable)
@@ -52,15 +52,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TArray<UMissionBase*>& GetActiveMissions() const;
 
-	UFUNCTION(BlueprintCallable)
-	TArray<FMissionStruct> GetAllAvailableMissionsData() const { return AvailableMissions; }
-	
+	// UFUNCTION(BlueprintCallable)
+	// TArray<FMissionStruct> GetAllAvailableMissionsData() const { return AvailableMissions; }
+	//
 	UFUNCTION(BlueprintCallable)
 	FMissionStruct GetMissionData(const FName MissionId) const;
 
 	/* Get the mission IDs (FName) of every completed mission */
 	UFUNCTION(BlueprintCallable)
 	const TArray<FName>& GetCompletedMissionIDs() const { return CompletedMissionIDs; }
+
+	/* Get the data for every completed mission */
+	UFUNCTION(BlueprintCallable)
+	const TArray<FMissionStruct>& GetCompletedMissionData() const { return CompletedMissionData; }
 
 	/* Called whenever a mission is added to the player */
 	FOnMissionAdded OnMissionAdded;
@@ -87,8 +91,8 @@ protected:
 	void HandleMissionProgressUpdated(UMissionBase* Mission);
 
 private:	
-	void LoadMissionAssets();
-	void InitialiseMission(UMissionAsset* Asset);
+	void LoadMissions();
+	void InitMission(UMissionBase* InMission);
 	
 	TMultiMap<FGameplayTag, UMissionBase*> ListenerMap;	
 	TArray<TObjectPtr<UMissionBase>> ActiveMissions = TArray<TObjectPtr<UMissionBase>>();
@@ -96,7 +100,7 @@ private:
 	void LoadProgress();
 	void CommitSave() const;
 
-	void GiveMissionRewards(const UMissionBase* Mission) const;
+	void GiveMissionRewards(UMissionBase* Mission);
 	
 	UPROPERTY()
 	TArray<FName> CompletedMissionIDs;
@@ -105,5 +109,8 @@ private:
 	TArray<FMissionStruct> OnGoingMissionsProgress;
 
 	UPROPERTY()
-	TArray<FMissionStruct> AvailableMissions;
+	TArray<UMissionBase*> CompletedMissions;
+	
+	UPROPERTY()
+	TArray<FMissionStruct> CompletedMissionData;
 };

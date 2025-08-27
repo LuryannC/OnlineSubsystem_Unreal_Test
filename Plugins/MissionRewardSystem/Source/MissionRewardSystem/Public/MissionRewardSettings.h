@@ -7,7 +7,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "MissionRewardSettings.generated.h"
 
-class UMissionAsset;
+class UMissionsAsset;
 /**
  * 
  */
@@ -21,10 +21,10 @@ public:
 	
 	/** List of mission PrimaryDataAssets loaded at startup */
 	UPROPERTY(EditAnywhere, config, Category = "Sources")
-	TArray<TSoftObjectPtr<UMissionAsset>> MissionAssets;
+	TArray<TSoftObjectPtr<UMissionsAsset>> Missions;
 
-	UPROPERTY(EditAnywhere, config, Category = "Sources")
-	TArray<TSoftObjectPtr<USeasonalMissionAsset>> SeasonalMissionAssets;
+	// UPROPERTY(EditAnywhere, config, Category = "Sources")
+	// TArray<TSoftObjectPtr<USeasonalMissionAsset>> SeasonalMissionAssets;
 
 	/* If false subscribe to the save delegates in the subsystem and do your own custom logic with the data */
 	UPROPERTY(EditAnywhere, config, Category = "Save")

@@ -3,11 +3,9 @@
 
 #include "Rewards/MRS_Gold.h"
 
-bool UMRS_Gold::GrantReward_Implementation(APlayerController* Recipient)
+bool UMRS_Gold::GrantReward_Implementation()
 {
-	if (!Recipient) return false;
-
-	UE_LOG(MissionRewardSystemLog, Display, TEXT("UMRS_Gold::GrantReward_Implementation - %s rewarded with %i gold(s)"), *Recipient->GetName(), Amount);
+	UE_LOG(MissionRewardSystemLog, Display, TEXT("UMRS_Gold::GrantReward_Implementation - rewarded with %i gold(s)"), Amount);
 
 	return true;
 }

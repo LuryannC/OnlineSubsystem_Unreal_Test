@@ -5,15 +5,19 @@
 #include "MissionRewardSettings.h"
 #include "MissionRewardSystemLog.h"
 
-void UMissionBase::InitialiseMission(UMissionAsset* InMissionAsset)
+UMissionBase::UMissionBase()
 {
-	check(InMissionAsset);
-	MissionAsset = InMissionAsset;
+	//
+	//MissionData = FMissionStruct();
+}
+
+void UMissionBase::InitialiseMission()
+{
 	bIsCompleted = false;
 	RuntimeConditions.Empty();
 
 	// Register conditions to complete
-	for (const FMissionCondition& Condition : MissionAsset->MissionData.Conditions)
+	for (const FMissionCondition& Condition : MissionData.Conditions)
 	{
 		FRuntimeCondition Runtime;
 		Runtime.EventTag = Condition.EventTag;
@@ -25,24 +29,18 @@ void UMissionBase::InitialiseMission(UMissionAsset* InMissionAsset)
 	ShowMissionDebugData();
 }
 
-void UMissionBase::InitialiseMission(UMissionBase* InMission)
+FMissionStruct UMissionBase::BP_GetMissionData() const
 {
-	check(InMission);
-	bIsCompleted = InMission->bIsCompleted;
-	RuntimeConditions = InMission->GetRuntimeConditions();
-	MissionAsset = InMission->GetMissionAssetData();
+	FMissionStruct MissionDataCopy = MissionData;
 	
-	ShowMissionDebugData();
+	UE_LOG(MissionRewardSystemLog, Log, TEXT("Break Test"));
+	return MissionData;
 }
 
-UMissionAsset* UMissionBase::GetMissionAssetData() const
+void UMissionBase::SetMissionCompleted()
 {
-	if (!MissionAsset)
-	{
-		UE_LOG(MissionRewardSystemLog, Error, TEXT(" UMissionBase::GetMissionAssetData - Invalid mission Asset."));
-		return nullptr;
-	}
-	return MissionAsset;
+	bIsCompleted = true;
+	MissionData.bIsCompleted = true;
 }
 
 void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amount)
@@ -105,7 +103,7 @@ void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amo
 	if (bAllComplete)
 	{
 		bIsCompleted = true;
-		MissionAsset->MissionData.bIsCompleted = true;
+		MissionData.bIsCompleted = true;
 		OnMissionCompleted.Broadcast(this);
 	}
 
@@ -126,7 +124,7 @@ void UMissionBase::ShowMissionDebugData()
 		if (Settings->bShowDebugMessages)
 		{
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("---------------- MISSION ----------------"));
-			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission: %s"), *MissionAsset->MissionData.MissionID.ToString());
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission: %s"), *MissionData.MissionID.ToString());
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("Num of Conditions: %i"), RuntimeConditions.Num());
 			for (const auto& Condition : RuntimeConditions)
 			{

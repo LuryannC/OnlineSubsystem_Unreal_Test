@@ -16,7 +16,8 @@ public class MenuSystem : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"OnlineSubsystemSteam",
-			"OnlineSubsystem"
+			"OnlineSubsystem",
+			"MissionRewardSystem",
 		});
 	}
 }

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MissionAsset.h"
+#include "MissionsAsset.h"
 #include "Engine/DataAsset.h"
 #include "Engine/PrimaryAssetLabel.h"
 #include "SeasonalMissionAsset.generated.h"
@@ -30,5 +30,5 @@ public:
 	FString SeasonID;
 	
 	UPROPERTY(EditAnywhere, Category = "Sources")
-	TArray<TSoftObjectPtr<UMissionAsset>> MissionAssets;	
+	TArray<TSoftObjectPtr<UMissionsAsset>> MissionAssets;	
 };

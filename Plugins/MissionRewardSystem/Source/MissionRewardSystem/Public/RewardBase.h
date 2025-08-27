@@ -11,7 +11,7 @@ class APlayerController;
 /**
  * 
  */
-UCLASS(Abstract, Blueprintable,EditInlineNew, DefaultToInstanced)
+UCLASS(Abstract, Blueprintable, EditInlineNew, DefaultToInstanced)
 class MISSIONREWARDSYSTEM_API URewardBase : public UObject
 {
 	GENERATED_BODY()
@@ -20,8 +20,8 @@ class MISSIONREWARDSYSTEM_API URewardBase : public UObject
 public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintAuthorityOnly, Category="Reward")
-	bool GrantReward(APlayerController* Recipient);
-	virtual bool GrantReward_Implementation(APlayerController* Recipient) { return true;}
+	bool GrantReward();
+	virtual bool GrantReward_Implementation() { return true;}
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UTexture2D> RewardIcon;

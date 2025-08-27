@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "UObject/Object.h"
-#include "MissionAsset.h"
 #include "MissionRewardDataTypes.h"
 #include "MissionBase.generated.h"
 
@@ -15,17 +14,24 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMissionCompleted, UMissionBase*, Mi
 /**
  * 
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(Abstract, BlueprintType, Blueprintable)
 class MISSIONREWARDSYSTEM_API UMissionBase : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void InitialiseMission(UMissionAsset* InMissionAsset);
-	void InitialiseMission(UMissionBase* InMission);
+	UMissionBase();
+	
+	void InitialiseMission();
+
+	UFUNCTION()
+	FMissionStruct GetMissionData() const { return MissionData; }
 
 	UFUNCTION(BlueprintCallable)
-	UMissionAsset* GetMissionAssetData() const;
+	FMissionStruct BP_GetMissionData() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void SetMissionCompleted();
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FRuntimeCondition> GetRuntimeConditions() { return RuntimeConditions; }
@@ -45,9 +51,8 @@ public:
 	bool bIsCompleted = false;
 
 private:
-
-	UPROPERTY()
-	UMissionAsset* MissionAsset;
+	UPROPERTY(EditAnywhere)
+	FMissionStruct MissionData;
 	
 	TArray<FRuntimeCondition> RuntimeConditions;
 
