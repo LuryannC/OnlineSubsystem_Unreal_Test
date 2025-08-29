@@ -93,8 +93,10 @@ protected:
 private:	
 	void LoadMissions();
 	void InitMission(UMissionBase* InMission);
-	
-	TMultiMap<FGameplayTag, UMissionBase*> ListenerMap;	
+
+	TMultiMap<FGameplayTag, UMissionBase*> ListenerMap;
+
+	UPROPERTY()
 	TArray<TObjectPtr<UMissionBase>> ActiveMissions = TArray<TObjectPtr<UMissionBase>>();
 
 	void LoadProgress();

@@ -133,7 +133,7 @@ void UMissionRewardSubsystem::InitMission(UMissionBase* InMission)
 	{
 		if (InMission->GetMissionData().MissionID == ProgressedMission.MissionID)
 		{
-			InMission->SetRuntimeConditionsFromSavedFile(ProgressedMission.ConditionsProgress);
+			InMission->UpdateRuntimeConditionsProgress(ProgressedMission.ConditionsProgress);
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionRewardSubsystem::InitialiseMission - Updated conditions from existing for Mission: %s"), *InMission->GetMissionData().MissionID.ToString());
 		}
 	}
@@ -204,18 +204,10 @@ void UMissionRewardSubsystem::HandleMissionCompleted(UMissionBase* Mission)
 
 	GiveMissionRewards(Mission);
 
-	CommitSave();
-	
-	// for (int i = 0; i < OnGoingMissionsProgress.Num() - 1; ++i)
-	// {
-	// 	if (OnGoingMissionsProgress[i].MissionID == MissionID)
-	// 	{
-	// 		IndexToRemove = i;
-	// 		
-	// 		break;
-	// 	}
-	// }
+	Mission->OnProgressUpdated.RemoveAll(this);
+	Mission->OnMissionCompleted.RemoveAll(this);
 
+	CommitSave();
 }
 
 void UMissionRewardSubsystem::HandleMissionProgressUpdated(UMissionBase* Mission)

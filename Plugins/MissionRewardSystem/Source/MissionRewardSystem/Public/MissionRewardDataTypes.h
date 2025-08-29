@@ -51,34 +51,23 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 
 	FMissionStruct(const FMissionStruct& Other)
 	: MissionID(Other.MissionID)
-	// , DisplayName(Other.DisplayName)
-	// , Description(Other.Description)
+	, DisplayName(Other.DisplayName)
+	, Description(Other.Description)
 	, Icon(Other.Icon)
 	, Conditions(Other.Conditions)
 	, Rewards(Other.Rewards)
 	, ConditionsProgress(Other.ConditionsProgress)
 	, bIsCompleted(Other.bIsCompleted)
 	{}
-
-	// FMissionStruct(const FName InMissionID, const TArray<FRuntimeCondition>& InConditionProgress)
-	// : MissionID(InMissionID)
-	// , DisplayName()
-	// , Description()
-	// , Icon(nullptr)
-	// , Conditions()
-	// , Rewards()
-	// , ConditionsProgress(InConditionProgress)
-	// , bIsCompleted(false)
-	// {}
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName MissionID;
 
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	// FString DisplayName;
-	//
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	// FString Description;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FText DisplayName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FText Description;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> Icon;

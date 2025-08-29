@@ -8,6 +8,7 @@
 #include "MissionRewardDataTypes.h"
 #include "MissionBase.generated.h"
 
+class UMissionDefinition;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMissionProgressUpdated, UMissionBase*, Mission);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMissionCompleted, UMissionBase*, Mission);
 
@@ -20,12 +21,10 @@ class MISSIONREWARDSYSTEM_API UMissionBase : public UObject
 	GENERATED_BODY()
 
 public:
-	UMissionBase();
-	
 	void InitialiseMission();
 
 	UFUNCTION()
-	FMissionStruct GetMissionData() const { return MissionData; }
+	FMissionStruct GetMissionData() const;
 
 	UFUNCTION(BlueprintCallable)
 	FMissionStruct BP_GetMissionData() const;
@@ -34,9 +33,10 @@ public:
 	void SetMissionCompleted();
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FRuntimeCondition> GetRuntimeConditions() { return RuntimeConditions; }
+	TArray<FRuntimeCondition> GetRuntimeConditions() { return MissionData.ConditionsProgress; }
+	// TArray<FRuntimeCondition> GetRuntimeConditions() { return RuntimeConditions; }
 
-	void SetRuntimeConditionsFromSavedFile(const TArray<FRuntimeCondition>& InRuntimeConditions);
+	void UpdateRuntimeConditionsProgress(const TArray<FRuntimeCondition>& InRuntimeConditions);
 
 	/** Called by the subsystem whenever a gameplay event occurs */
 	void OnGameplayEvent(const FGameplayTag& EventTag, int32 Amount);
@@ -51,10 +51,8 @@ public:
 	bool bIsCompleted = false;
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	FMissionStruct MissionData;
-	
-	TArray<FRuntimeCondition> RuntimeConditions;
 
 	void ShowMissionDebugData();
 };
