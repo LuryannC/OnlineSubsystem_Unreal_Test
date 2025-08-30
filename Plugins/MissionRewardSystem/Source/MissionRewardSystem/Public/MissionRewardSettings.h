@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SeasonalMissionAsset.h"
 #include "Engine/DeveloperSettings.h"
 #include "MissionRewardSettings.generated.h"
 
@@ -22,9 +21,6 @@ public:
 	/** List of mission PrimaryDataAssets loaded at startup */
 	UPROPERTY(EditAnywhere, config, Category = "Sources")
 	TArray<TSoftObjectPtr<UMissionsAsset>> Missions;
-
-	// UPROPERTY(EditAnywhere, config, Category = "Sources")
-	// TArray<TSoftObjectPtr<USeasonalMissionAsset>> SeasonalMissionAssets;
 
 	/* If false subscribe to the save delegates in the subsystem and do your own custom logic with the data */
 	UPROPERTY(EditAnywhere, config, Category = "Save")

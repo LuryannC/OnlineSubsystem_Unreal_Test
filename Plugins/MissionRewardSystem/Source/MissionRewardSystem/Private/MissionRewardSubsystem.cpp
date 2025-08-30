@@ -15,11 +15,7 @@ void UMissionRewardSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		if (!Settings->bSaveLocally) return;
 
-#if WITH_EDITOR		
-		LoadProgress();		
-#else		
-		FCoreDelegates::OnPostEngineInit.AddUObject(this, &UMissionRewardSubsystem::LoadProgress);
-#endif
+		LoadProgress();
 	}
 }
 
@@ -75,14 +71,9 @@ void UMissionRewardSubsystem::LoadMissions()
 		UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionRewardSubsystem::LoadMissionAssets - Available Mission Assets: %i"), Settings->Missions.Num());
 		for (const TSoftObjectPtr<UMissionsAsset>& MissionAsset : Settings->Missions)
 		{
-			UMissionsAsset* CurrentMissionAsset = MissionAsset.LoadSynchronous();
-			if (CurrentMissionAsset)
+			if (UMissionsAsset* CurrentMissionAsset = MissionAsset.LoadSynchronous())
 			{
 				Assets.Add(CurrentMissionAsset);
-				// for (const auto& Mission : CurrentMissionAsset->Missions)
-				// {					
-				// 	AvailableMissions.Add(Mission->GetMissionData());
-				// }
 			}
 		}		
 		PreInitMissions(Assets);
@@ -186,7 +177,7 @@ void UMissionRewardSubsystem::HandleMissionCompleted(UMissionBase* Mission)
 	OnMissionCompleted.Broadcast(Mission->GetMissionData().MissionID.ToString());
 
 	const FName MissionID = Mission->GetMissionData().MissionID;
-	const int32 IndexToRemove = OnGoingMissionsProgress.IndexOfByPredicate([&](const FMissionStruct& CurrentMission)
+	const int32 IndexToRemove = OnGoingMissionsProgress.IndexOfByPredicate([&](const FProgressedMissions& CurrentMission)
 	{
 		return CurrentMission.MissionID == MissionID;
 	});
@@ -219,7 +210,7 @@ void UMissionRewardSubsystem::HandleMissionProgressUpdated(UMissionBase* Mission
 	const FMissionStruct NewProgress(Mission->GetMissionData());
 
 	// Look for existing index
-	const int32 ExistingIndex = OnGoingMissionsProgress.IndexOfByPredicate([&](const FMissionStruct& Entry)
+	const int32 ExistingIndex = OnGoingMissionsProgress.IndexOfByPredicate([&](const FProgressedMissions& Entry)
 	{
 		return Entry.MissionID == MissionID;
 	});
@@ -289,19 +280,6 @@ void UMissionRewardSubsystem::GiveMissionRewards(UMissionBase* Mission)
 			const FName MissionUID = Mission->GetMissionData().MissionID;
 
 			OnRewardUnlocked.Broadcast(MissionUID.ToString(), bWasSuccessful, bWasSuccessful ? EUnlockReasonFailReason::Success : EUnlockReasonFailReason::Unknown);
-			// UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionRewardSubsystem::GiveMissionRewards - Reward give process was: "), FStri);
 		}
 	}
-}
-
-FMissionStruct UMissionRewardSubsystem::GetMissionData(const FName MissionId) const
-{
-	// for (const auto& MissionData : AvailableMissions)
-	// {
-	// 	if (MissionData.MissionID == MissionId)
-	// 	{
-	// 		return MissionData;
-	// 	}
-	// }
-	return FMissionStruct{};
 }

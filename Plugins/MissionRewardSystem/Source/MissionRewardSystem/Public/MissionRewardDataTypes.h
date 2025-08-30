@@ -88,20 +88,23 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 	{
 		return MissionID == Other.MissionID;
 	}
+};
 
-	// FMissionStruct& operator=(const FMissionStruct& Other)
-	// {
-	// 	if (this != &Other)
-	// 	{
-	// 		MissionID = Other.MissionID;
-	// 		DisplayName = Other.DisplayName;
-	// 		Description = Other.Description;
-	// 		Icon = Other.Icon;
-	// 		Conditions = Other.Conditions;
-	// 		Rewards = Other.Rewards;
-	// 		ConditionsProgress = Other.ConditionsProgress;
-	// 		bIsCompleted = Other.bIsCompleted;
-	// 	}
-	// 	return *this;
-	// }
+USTRUCT(BlueprintType)
+struct MISSIONREWARDSYSTEM_API FProgressedMissions
+{
+	GENERATED_BODY()
+
+	FProgressedMissions() = default;
+
+	FProgressedMissions(const FMissionStruct& InMission)
+	: MissionID(InMission.MissionID)
+	, ConditionsProgress(InMission.ConditionsProgress)
+	{}
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName MissionID;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FRuntimeCondition> ConditionsProgress;
 };

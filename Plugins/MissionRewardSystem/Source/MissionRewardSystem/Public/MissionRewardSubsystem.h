@@ -52,12 +52,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TArray<UMissionBase*>& GetActiveMissions() const;
 
-	// UFUNCTION(BlueprintCallable)
-	// TArray<FMissionStruct> GetAllAvailableMissionsData() const { return AvailableMissions; }
-	//
-	UFUNCTION(BlueprintCallable)
-	FMissionStruct GetMissionData(const FName MissionId) const;
-
 	/* Get the mission IDs (FName) of every completed mission */
 	UFUNCTION(BlueprintCallable)
 	const TArray<FName>& GetCompletedMissionIDs() const { return CompletedMissionIDs; }
@@ -108,7 +102,8 @@ private:
 	TArray<FName> CompletedMissionIDs;
 	
 	UPROPERTY()
-	TArray<FMissionStruct> OnGoingMissionsProgress;
+	TArray<FProgressedMissions> OnGoingMissionsProgress;
+	// TArray<FMissionStruct> OnGoingMissionsProgress;
 
 	UPROPERTY()
 	TArray<UMissionBase*> CompletedMissions;

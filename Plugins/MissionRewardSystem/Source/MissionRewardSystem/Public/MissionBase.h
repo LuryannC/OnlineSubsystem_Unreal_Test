@@ -34,7 +34,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FRuntimeCondition> GetRuntimeConditions() { return MissionData.ConditionsProgress; }
-	// TArray<FRuntimeCondition> GetRuntimeConditions() { return RuntimeConditions; }
 
 	void UpdateRuntimeConditionsProgress(const TArray<FRuntimeCondition>& InRuntimeConditions);
 
