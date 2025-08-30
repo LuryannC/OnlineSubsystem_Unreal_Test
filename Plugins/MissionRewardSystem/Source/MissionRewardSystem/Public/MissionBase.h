@@ -8,7 +8,6 @@
 #include "MissionRewardDataTypes.h"
 #include "MissionBase.generated.h"
 
-class UMissionDefinition;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMissionProgressUpdated, UMissionBase*, Mission);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMissionCompleted, UMissionBase*, Mission);
 
@@ -33,9 +32,9 @@ public:
 	void SetMissionCompleted();
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FRuntimeCondition> GetRuntimeConditions() { return MissionData.ConditionsProgress; }
+	TArray<FMissionCondition> GetMissionConditions() { return MissionData.Conditions; }
 
-	void UpdateRuntimeConditionsProgress(const TArray<FRuntimeCondition>& InRuntimeConditions);
+	void UpdateRuntimeConditionsProgress(const TArray<FMissionCondition>& InMissionCondition);
 
 	/** Called by the subsystem whenever a gameplay event occurs */
 	void OnGameplayEvent(const FGameplayTag& EventTag, int32 Amount);
@@ -45,9 +44,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FMissionCompleted OnMissionCompleted;
-	
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsCompleted = false;
 
 private:
 	UPROPERTY(EditDefaultsOnly)

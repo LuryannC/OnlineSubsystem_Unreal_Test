@@ -222,7 +222,7 @@ void UMissionRewardSubsystem::HandleMissionProgressUpdated(UMissionBase* Mission
 		for (int i = 0; i < OnGoingMissionsProgress[ExistingIndex].ConditionsProgress.Num() - 1; ++i)
 		{
 			const int32 PreviousProgressAmount = OnGoingMissionsProgress[ExistingIndex].ConditionsProgress[i].Current;
-			const int32 NewProgressAmount = NewProgress.ConditionsProgress[i].Current;
+			const int32 NewProgressAmount = NewProgress.Conditions[i].Current;
 			FString ConditionName = OnGoingMissionsProgress[ExistingIndex].ConditionsProgress[i].EventTag.ToString();
 			
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionRewardSubsystem::HandleMissionProgressUpdated - Updated %s progress for %s from %i to %i"), *MissionID.ToString(), *ConditionName, PreviousProgressAmount, NewProgressAmount);
@@ -237,7 +237,7 @@ void UMissionRewardSubsystem::HandleMissionProgressUpdated(UMissionBase* Mission
 		UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionRewardSubsystem::HandleMissionProgressUpdated - New progress registered for %s!"), *MissionID.ToString());
 	}
 
-	if (Mission->bIsCompleted)
+	if (Mission->GetMissionData().bIsCompleted)
 	{
 		HandleMissionCompleted(Mission);
 		return;
@@ -264,7 +264,7 @@ void UMissionRewardSubsystem::CommitSave() const
 	}
 }
 
-void UMissionRewardSubsystem::GiveMissionRewards(UMissionBase* Mission)
+void UMissionRewardSubsystem::GiveMissionRewards(const UMissionBase* Mission)
 {
 	for (const auto& RewardClass : Mission->GetMissionData().Rewards)
 	{
@@ -277,9 +277,9 @@ void UMissionRewardSubsystem::GiveMissionRewards(UMissionBase* Mission)
 			}
 
 			const bool bWasSuccessful = RewardInstance->GrantReward();
-			const FName MissionUID = Mission->GetMissionData().MissionID;
+			const FName MissionID = Mission->GetMissionData().MissionID;
 
-			OnRewardUnlocked.Broadcast(MissionUID.ToString(), bWasSuccessful, bWasSuccessful ? EUnlockReasonFailReason::Success : EUnlockReasonFailReason::Unknown);
+			OnRewardUnlocked.Broadcast(MissionID.ToString(), bWasSuccessful, bWasSuccessful ? EUnlockReasonFailReason::Success : EUnlockReasonFailReason::Unknown);
 		}
 	}
 }

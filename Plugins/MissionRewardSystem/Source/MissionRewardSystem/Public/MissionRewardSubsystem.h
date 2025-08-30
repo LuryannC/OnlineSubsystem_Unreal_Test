@@ -96,14 +96,13 @@ private:
 	void LoadProgress();
 	void CommitSave() const;
 
-	void GiveMissionRewards(UMissionBase* Mission);
+	void GiveMissionRewards(const UMissionBase* Mission);
 	
 	UPROPERTY()
 	TArray<FName> CompletedMissionIDs;
 	
 	UPROPERTY()
 	TArray<FProgressedMissions> OnGoingMissionsProgress;
-	// TArray<FMissionStruct> OnGoingMissionsProgress;
 
 	UPROPERTY()
 	TArray<UMissionBase*> CompletedMissions;

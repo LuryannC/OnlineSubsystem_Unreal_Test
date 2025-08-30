@@ -25,18 +25,6 @@ struct MISSIONREWARDSYSTEM_API FMissionCondition
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 TargetCount = 1;
-};
-
-USTRUCT(BlueprintType)
-struct MISSIONREWARDSYSTEM_API FRuntimeCondition
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly)
-	FGameplayTag EventTag = FGameplayTag();
-
-	UPROPERTY(BlueprintReadOnly)
-	int32 Target = 0;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Current = 0;
@@ -56,7 +44,6 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 	, Icon(Other.Icon)
 	, Conditions(Other.Conditions)
 	, Rewards(Other.Rewards)
-	, ConditionsProgress(Other.ConditionsProgress)
 	, bIsCompleted(Other.bIsCompleted)
 	{}
 	
@@ -79,9 +66,6 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 	TArray<TSoftClassPtr<URewardBase>> Rewards;
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<FRuntimeCondition> ConditionsProgress;
-
-	UPROPERTY(BlueprintReadOnly)
 	bool bIsCompleted = false;
 
 	bool operator==(const FMissionStruct& Other) const
@@ -99,12 +83,12 @@ struct MISSIONREWARDSYSTEM_API FProgressedMissions
 
 	FProgressedMissions(const FMissionStruct& InMission)
 	: MissionID(InMission.MissionID)
-	, ConditionsProgress(InMission.ConditionsProgress)
+	, ConditionsProgress(InMission.Conditions)
 	{}
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName MissionID;
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<FRuntimeCondition> ConditionsProgress;
+	TArray<FMissionCondition> ConditionsProgress;
 };

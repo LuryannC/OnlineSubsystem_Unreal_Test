@@ -7,18 +7,7 @@
 
 void UMissionBase::InitialiseMission()
 {
-	bIsCompleted = false;
-
-	// Register conditions to complete
-	for (const FMissionCondition& Condition : MissionData.Conditions)
-	{
-		FRuntimeCondition Runtime;
-		Runtime.EventTag = Condition.EventTag;
-		Runtime.Target   = FMath::Max(1, Condition.TargetCount);
-		Runtime.Current  = 0;
-		MissionData.ConditionsProgress.Add(Runtime);
-	}
-
+	MissionData.bIsCompleted = false;
 	ShowMissionDebugData();
 }
 
@@ -29,40 +18,36 @@ FMissionStruct UMissionBase::GetMissionData() const
 
 FMissionStruct UMissionBase::BP_GetMissionData() const
 {
-	FMissionStruct MissionDataCopy = MissionData;
-	
-	UE_LOG(MissionRewardSystemLog, Log, TEXT("Break Test"));
 	return MissionData;
 }
 
 void UMissionBase::SetMissionCompleted()
 {
-	bIsCompleted = true;
 	MissionData.bIsCompleted = true;
 }
 
 void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amount)
 {
-	if (bIsCompleted || Amount <= 0)
+	if (MissionData.bIsCompleted || Amount <= 0)
 	{
 		return;
 	}
 
 	bool bAnyProgressed = false;
 
-	if (MissionData.ConditionsProgress.Num() == 0)
+	if (MissionData.Conditions.Num() == 0)
 	{
 		UE_LOG(MissionRewardSystemLog, Warning, TEXT("UMissionBase::OnGameplayEvent - No runtime conditions found. Skipping progress."));
 		return;
 	}
 
-	for (FRuntimeCondition& RC : MissionData.ConditionsProgress)
+	for (FMissionCondition& RC : MissionData.Conditions)
 	{
 		// Exact match is cheapest; Although MatchesTag allow for hierarchy support EventTag.MatchesTag(RC.EventTag)
 		if (EventTag.MatchesTagExact(RC.EventTag))
 		{
 			const int32 Old = RC.Current;
-			RC.Current = FMath::Clamp(RC.Current + Amount, 0, RC.Target);
+			RC.Current = FMath::Clamp(RC.Current + Amount, 0, RC.TargetCount);
 			if (RC.Current != Old)
 			{
 				bAnyProgressed = true;
@@ -78,19 +63,19 @@ void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amo
 
 	bool bAllComplete = true;
 
-	for (const FRuntimeCondition& RC : MissionData.ConditionsProgress)
+	for (const FMissionCondition& RC : MissionData.Conditions)
 	{
-		if (RC.Target <= 0)
+		if (RC.TargetCount <= 0)
 		{
-			UE_LOG(MissionRewardSystemLog, Warning, TEXT("UMissionBase::OnGameplayEvent - Invalid RC.Target (%d) for tag %s"), RC.Target, *RC.EventTag.ToString());
+			UE_LOG(MissionRewardSystemLog, Warning, TEXT("UMissionBase::OnGameplayEvent - Invalid RC.Target (%d) for tag %s"), RC.TargetCount, *RC.EventTag.ToString());
 			bAllComplete = false;
 			continue;
 		}
 		
-		if (RC.Current < RC.Target)
+		if (RC.Current < RC.TargetCount)
 		{
 			bAllComplete = false;
-			UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionBase::OnGameplayEvent - Condition %s not met. Current: %i - Target %i"), *RC.EventTag.ToString(), RC.Current, RC.Target);
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("UMissionBase::OnGameplayEvent - Condition %s not met. Current: %i - Target %i"), *RC.EventTag.ToString(), RC.Current, RC.TargetCount);
 		}
 	}
 
@@ -100,7 +85,6 @@ void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amo
 
 	if (bAllComplete)
 	{
-		bIsCompleted = true;
 		MissionData.bIsCompleted = true;
 		OnMissionCompleted.Broadcast(this);
 	}
@@ -108,9 +92,9 @@ void UMissionBase::OnGameplayEvent(const FGameplayTag& EventTag, const int32 Amo
 	ShowMissionDebugData();
 }
 
-void UMissionBase::UpdateRuntimeConditionsProgress(const TArray<FRuntimeCondition>& InRuntimeConditions)
+void UMissionBase::UpdateRuntimeConditionsProgress(const TArray<FMissionCondition>& InMissionCondition)
 {
-	MissionData.ConditionsProgress = InRuntimeConditions;
+	MissionData.Conditions = InMissionCondition;
 	ShowMissionDebugData();
 }
 
@@ -123,12 +107,12 @@ void UMissionBase::ShowMissionDebugData()
 		{
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("---------------- MISSION ----------------"));
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission: %s"), *MissionData.MissionID.ToString());
-			UE_LOG(MissionRewardSystemLog, Log, TEXT("Num of Conditions: %i"), MissionData.ConditionsProgress.Num());
-			for (const auto& Condition : MissionData.ConditionsProgress)
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Num of Conditions: %i"), MissionData.Conditions.Num());
+			for (const auto& Condition : MissionData.Conditions)
 			{
-				UE_LOG(MissionRewardSystemLog, Log, TEXT("Condition: %s | Current: %i | Target: %i"), *Condition.EventTag.ToString(), Condition.Current, Condition.Target);
+				UE_LOG(MissionRewardSystemLog, Log, TEXT("Condition: %s | Current: %i | Target: %i"), *Condition.EventTag.ToString(), Condition.Current, Condition.TargetCount);
 			}
-			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission completed: %hs"), bIsCompleted ? ("True") : ("False"));
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission completed: %hs"), MissionData.bIsCompleted ? ("True") : ("False"));
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("-----------------------------------------"));
 		}
 	}
