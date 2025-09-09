@@ -13,7 +13,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionAdded, const UMissionBase*, MissionInstance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionCompleted, const FString&, CompletedMissionID);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRewardUnlocked, const FString&, CompletedMissionID, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnRewardUnlocked, const FString&, CompletedMissionID, bool, bWasSuccessful, EUnlockReasonFailReason, FailReason);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionRewardSystemSaved, UMissionRewardSave*, SaveData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionRewardSystemLoaded, UMissionRewardSave*, SaveData);
@@ -32,8 +32,8 @@ public:
 	virtual void Deinitialize() override;
 
 	/* Method to give mission at runtime */
-	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	void GrantMission(TSoftClassPtr<UMissionBase> MissionClass, bool bAllowDuplicates = true);
+	UFUNCTION()
+	void GrantMission(UMissionBase* InMission, bool bAllowDuplicates = true);
 
 	/* Method to call whenever a gameplay event that has mission bound to it happen*/
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
@@ -103,10 +103,6 @@ private:
 	
 	UPROPERTY()
 	TArray<FProgressedMissions> OnGoingMissionsProgress;
-	
-	UPROPERTY()
-	TArray<FGrantedMission> GrantedMissions;
-	// TArray<TSoftClassPtr<UMissionBase>> GrantedMissions;
 
 	UPROPERTY()
 	TArray<UMissionBase*> CompletedMissions;

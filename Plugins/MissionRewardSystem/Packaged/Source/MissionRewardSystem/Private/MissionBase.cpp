@@ -11,15 +11,7 @@ void UMissionBase::InitialiseMission()
 
 	// MissionID is mandatory as a lot of logic resolve around it.
 	const FString MissionID = MissionData.MissionID.ToString();
-	if (MissionID.IsEmpty())
-	{
-		UE_LOG(MissionRewardSystemLog, Error, TEXT("UMissionBase::InitialiseMission() - MissionID is empty!! Please give missions an ID."))
-	}
-
-	if (!MissionData.InstanceID.IsValid())
-	{
-		MissionData.InstanceID = FGuid::NewGuid();
-	}
+	UE_LOG(MissionRewardSystemLog, Error, TEXT("UMissionBase::InitialiseMission() - MissionID is empty!! Please give missions an ID."))
 	
 	ShowMissionDebugData();
 }

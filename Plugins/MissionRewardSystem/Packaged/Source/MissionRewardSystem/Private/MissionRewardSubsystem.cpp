@@ -19,15 +19,6 @@ void UMissionRewardSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UMissionRewardSubsystem::Deinitialize()
 {
-	if (!ActiveMissions.IsEmpty())
-	{
-		for (auto Mission : ActiveMissions)
-		{
-			Mission.Get()->OnProgressUpdated.RemoveAll(this);
-			Mission.Get()->OnMissionCompleted.RemoveAll(this);
-		}
-	}
-	
 	ActiveMissions.Empty();
 	ListenerMap.Empty();
 	CompletedMissionIDs.Empty();
@@ -44,7 +35,6 @@ void UMissionRewardSubsystem::LoadProgress()
 		{
 			CompletedMissionIDs = Save->CompletedMissionIDs;
 			OnGoingMissionsProgress = Save->OnGoingMissionsProgress;
-			GrantedMissions = Save->GrantedMissions;
 		}
 	}
 
@@ -60,7 +50,6 @@ void UMissionRewardSubsystem::LoadProgress(UMissionRewardSave* SaveData)
 	
 	CompletedMissionIDs = SaveData->CompletedMissionIDs;
 	OnGoingMissionsProgress = SaveData->OnGoingMissionsProgress;
-	GrantedMissions = SaveData->GrantedMissions;
 
 	OnMissionRewardSystemLoaded.Broadcast(SaveData);
 	LoadMissions();
@@ -85,19 +74,6 @@ void UMissionRewardSubsystem::LoadMissions()
 			}
 		}		
 		PreInitMissions(Assets);
-
-		// Load runtime granted missions
-		for (const auto& GrantedClass : GrantedMissions)
-		{
-			if (const UClass* LoadedClass = GrantedClass.MissionClass.LoadSynchronous())
-			{
-				if (UMissionBase* Mission = NewObject<UMissionBase>(this, LoadedClass))
-				{
-					Mission->SetInstanceID(GrantedClass.InstanceID);
-					InitMission(Mission);
-				}
-			}
-		}
 	}
 }
 
@@ -126,7 +102,6 @@ void UMissionRewardSubsystem::PreInitMissions(const TArray<UMissionsAsset*>& Ass
 				{
 					if (UMissionBase* Mission = NewObject<UMissionBase>(this, LoadedClass))
 					{
-						Mission->SetInstanceID(FGuid::NewDeterministicGuid(LoadedClass->GetPathName()));
 						InitMission(Mission);
 					}
 				}
@@ -139,39 +114,16 @@ void UMissionRewardSubsystem::InitMission(UMissionBase* InMission)
 {
 	InMission->InitialiseMission();
 	
-	if (!InMission->OnProgressUpdated.IsBound())
-	{
-		InMission->OnProgressUpdated.AddDynamic(this, &UMissionRewardSubsystem::HandleMissionProgressUpdated);
-	}
+	InMission->OnProgressUpdated.AddDynamic(this, &UMissionRewardSubsystem::HandleMissionProgressUpdated);
+	InMission->OnMissionCompleted.AddDynamic(this, &UMissionRewardSubsystem::HandleMissionCompleted);
 
-	if (!InMission->OnMissionCompleted.IsBound())
+	for (const auto& ProgressedMission : OnGoingMissionsProgress)
 	{
-		InMission->OnMissionCompleted.AddDynamic(this, &UMissionRewardSubsystem::HandleMissionCompleted);
+		if (InMission->GetMissionData().MissionID == ProgressedMission.MissionID)
+		{
+			InMission->UpdateRuntimeConditionsProgress(ProgressedMission.ConditionsProgress);
+		}
 	}
-	
-	if (const FProgressedMissions* Saved = OnGoingMissionsProgress.FindByPredicate(
-[&](const FProgressedMissions& P){ return P.InstanceID == InMission->GetMissionData().InstanceID; }))
-	{
-		InMission->UpdateRuntimeConditionsProgress(Saved->ConditionsProgress);
-	};
-
-	// for (const auto& ProgressedMission : OnGoingMissionsProgress)
-	// {
-	// 	// if (InMission->GetMissionData().MissionID == ProgressedMission.MissionID)
-	// 	const FGuid CurrentGuid = InMission->GetMissionData().InstanceID;
-	// 	const FProgressedMissions* SavedByGuid = nullptr;
-	// }
-		
-		// if (!InMission->GetMissionData().InstanceID.IsValid() || !ProgressedMission.InstanceID.IsValid())
-		// {
-		// 	continue;	
-		// }
-		//
-		// if (InMission->GetMissionData().InstanceID == ProgressedMission.InstanceID)
-		// {
-		// 	InMission->UpdateRuntimeConditionsProgress(ProgressedMission.ConditionsProgress);
-		// }
-		
 
 	ActiveMissions.Add(InMission);
 	OnMissionAdded.Broadcast(InMission);
@@ -182,53 +134,17 @@ void UMissionRewardSubsystem::InitMission(UMissionBase* InMission)
 	}
 }
 
-void UMissionRewardSubsystem::GrantMission(TSoftClassPtr<UMissionBase> MissionClass, const bool bAllowDuplicates)
+void UMissionRewardSubsystem::GrantMission(UMissionBase* InMission, const bool bAllowDuplicates)
 {
-	if (!MissionClass)
+	if (!InMission) return;
+
+	// Checking if this mission should be added again.
+	if (CompletedMissionIDs.Contains(InMission->GetMissionData().MissionID) && !bAllowDuplicates)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GrantMission called with invalid MissionClass."));
 		return;
 	}
 
-	// Avoid granting the same mission twice
-	UMissionBase* Mission = Cast<UMissionBase>(MissionClass->GetDefaultObject());
-	if (!Mission)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GrantMission: Could not get default object for mission."));
-		return;
-	}
-
-	const FName MissionID = Mission->GetMissionData().MissionID;
-	
-	if (!bAllowDuplicates)
-	{
-		if (CompletedMissionIDs.Contains(MissionID))
-		{
-			UE_LOG(LogTemp, Log, TEXT("GrantMission: Mission %s already completed."), *MissionID.ToString());
-			return;
-		}
-	
-		if (ActiveMissions.ContainsByPredicate([&](const UMissionBase* M){ return M->GetMissionData().MissionID == MissionID; }))
-		{
-			UE_LOG(LogTemp, Log, TEXT("GrantMission: Mission %s already active."), *MissionID.ToString());
-			return;
-		}
-	}
-
-	if (UMissionBase* NewMission = NewObject<UMissionBase>(this, MissionClass.Get()))
-	{
-		// bIsGranted = true -> ensures it starts with clean progress
-		InitMission(NewMission);
-
-		const FMissionStruct NewProgress(NewMission->GetMissionData());
-		OnGoingMissionsProgress.Add(NewProgress);
-		GrantedMissions.Add(FGrantedMission(NewMission->GetClass(), NewMission->GetMissionData().InstanceID));
-		// GrantedMissions.Add(NewMission->GetClass());
-
-		CommitSave();
-
-		UE_LOG(LogTemp, Log, TEXT("GrantMission: Granted mission %s"), *MissionID.ToString());
-	}
+	InitMission(InMission);
 }
 
 void UMissionRewardSubsystem::ReportGameplayEvent(const FGameplayTag& EventTag, int32 Amount)
@@ -248,40 +164,21 @@ void UMissionRewardSubsystem::HandleMissionCompleted(UMissionBase* Mission)
 {
 	if (!Mission) return;
 
-	CompletedMissionIDs.Add(Mission->GetMissionData().MissionID);
+	CompletedMissionIDs.AddUnique(Mission->GetMissionData().MissionID);
 	CompletedMissionData.Add(Mission->GetMissionData());
 	ActiveMissions.Remove(Mission);
-	
 
 	OnMissionCompleted.Broadcast(Mission->GetMissionData().MissionID.ToString());
 
-	// const FName MissionID = Mission->GetMissionData().MissionID;
-	const FGuid MissionInstanceID = Mission->GetMissionData().InstanceID;
-
+	const FName MissionID = Mission->GetMissionData().MissionID;
 	const int32 IndexToRemove = OnGoingMissionsProgress.IndexOfByPredicate([&](const FProgressedMissions& CurrentMission)
 	{
-		// return CurrentMission.MissionID == MissionID;
-		return CurrentMission.InstanceID == MissionInstanceID;
+		return CurrentMission.MissionID == MissionID;
 	});
 	
 	if (IndexToRemove != INDEX_NONE)
 	{
 		OnGoingMissionsProgress.RemoveAt(IndexToRemove);
-	}
-
-	// Check if it was a granted mission
-	GrantedMissions.RemoveAll([&](const FGrantedMission& GrantedMission)
-	{
-		return GrantedMission.InstanceID == MissionInstanceID;
-	});
-	// if (GrantedMissions.Contains(Mission->GetClass()))
-	// {
-	// 	GrantedMissions.Remove(Mission->GetClass());
-	// }
-	
-	for (const FMissionCondition& Condition : Mission->GetMissionData().Conditions)
-	{
-		ListenerMap.RemoveSingle(Condition.EventTag, Mission);
 	}
 	
 	GiveMissionRewards(Mission);
@@ -296,41 +193,25 @@ void UMissionRewardSubsystem::HandleMissionProgressUpdated(UMissionBase* Mission
 {
 	if (!Mission) return;
 
-	// const FName MissionID = Mission->GetMissionData().MissionID;
-	const FGuid MissionInstanceID = Mission->GetMissionData().InstanceID;
+	const FName MissionID = Mission->GetMissionData().MissionID;
 	const FMissionStruct NewProgress(Mission->GetMissionData());
-	
-	int32 ExistingIndex = OnGoingMissionsProgress.IndexOfByPredicate([&](const FProgressedMissions& Entry)
+
+	const int32 ExistingIndex = OnGoingMissionsProgress.IndexOfByPredicate([&](const FProgressedMissions& Entry)
 	{
-		return Entry.InstanceID == MissionInstanceID;
+		return Entry.MissionID == MissionID;
 	});
+
 
 	if (ExistingIndex != INDEX_NONE)
 	{
+		// Updating existing entry
 		OnGoingMissionsProgress[ExistingIndex] = NewProgress;
 	}
 	else
 	{
+		// Adding new entry
 		OnGoingMissionsProgress.Add(NewProgress);
 	}
-
-	// const int32 ExistingIndex = OnGoingMissionsProgress.IndexOfByPredicate([&](const FProgressedMissions& Entry)
-	// {
-	// 	// return Entry.MissionID == MissionID;
-	// 	return Entry.InstanceID == MissionInstanceID;
-	// });
-	//
-	//
-	// if (ExistingIndex != INDEX_NONE)
-	// {
-	// 	// Updating existing entry
-	// 	OnGoingMissionsProgress[ExistingIndex] = NewProgress;
-	// }
-	// else
-	// {
-	// 	// Adding new entry
-	// 	OnGoingMissionsProgress.Add(NewProgress);
-	// }
 
 	if (Mission->GetMissionData().bIsCompleted)
 	{
@@ -349,7 +230,6 @@ void UMissionRewardSubsystem::CommitSave() const
 		{
 			Save->CompletedMissionIDs = CompletedMissionIDs;
 			Save->OnGoingMissionsProgress = OnGoingMissionsProgress;
-			Save->GrantedMissions = GrantedMissions;
 
 			if (Settings->bSaveLocally)
 			{
@@ -375,7 +255,7 @@ void UMissionRewardSubsystem::GiveMissionRewards(const UMissionBase* Mission)
 			const bool bWasSuccessful = RewardInstance->GrantReward();
 			const FName MissionID = Mission->GetMissionData().MissionID;
 
-			OnRewardUnlocked.Broadcast(MissionID.ToString(), bWasSuccessful);
+			OnRewardUnlocked.Broadcast(MissionID.ToString(), bWasSuccessful, bWasSuccessful ? EUnlockReasonFailReason::Success : EUnlockReasonFailReason::Unknown);
 		}
 	}
 }

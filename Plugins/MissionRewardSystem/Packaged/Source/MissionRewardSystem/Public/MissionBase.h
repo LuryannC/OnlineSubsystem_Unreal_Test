@@ -30,9 +30,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
 	void SetMissionCompleted();
-	
-	UFUNCTION()
-	void SetInstanceID(const FGuid& InID) { MissionData.InstanceID = InID; }
 
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
 	TArray<FMissionCondition> GetMissionConditions() { return MissionData.Conditions; }

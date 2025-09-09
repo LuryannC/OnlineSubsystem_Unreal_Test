@@ -23,8 +23,4 @@ public:
 	
 	UPROPERTY()
 	TArray<FProgressedMissions> OnGoingMissionsProgress;
-
-	UPROPERTY()
-	TArray<FGrantedMission> GrantedMissions;
-	// TArray<TSoftClassPtr<UMissionBase>> GrantedMissions;
 };

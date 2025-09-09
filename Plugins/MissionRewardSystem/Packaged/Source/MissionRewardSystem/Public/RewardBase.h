@@ -22,4 +22,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintAuthorityOnly, Category="Reward")
 	bool GrantReward();
 	virtual bool GrantReward_Implementation() { return true;}
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MissionRewardSystem")
+	TObjectPtr<UTexture2D> RewardIcon;
 };

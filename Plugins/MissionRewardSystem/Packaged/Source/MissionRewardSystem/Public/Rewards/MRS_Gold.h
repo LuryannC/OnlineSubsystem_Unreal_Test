@@ -19,7 +19,4 @@ public:
 	int32 Amount = 100;
 
 	virtual bool GrantReward_Implementation() override;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MissionRewardSystem")
-	TObjectPtr<UTexture2D> RewardIcon;
 };

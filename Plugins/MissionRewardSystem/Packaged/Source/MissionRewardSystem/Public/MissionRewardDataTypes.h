@@ -7,6 +7,15 @@
 
 class URewardBase;
 
+UENUM(BlueprintType)
+enum class EUnlockReasonFailReason : uint8
+{
+	NotFound         UMETA(DisplayName="Not Found"),
+	AlreadyCompleted UMETA(DisplayName="Already Completed"),
+	Unknown          UMETA(DisplayName="Unknown"),
+	Success          UMETA(DisplayName="Success"),
+};
+
 USTRUCT(BlueprintType)
 struct MISSIONREWARDSYSTEM_API FMissionCondition
 {
@@ -30,8 +39,7 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 	FMissionStruct() = default;
 
 	FMissionStruct(const FMissionStruct& Other)
-	: InstanceID(Other.InstanceID)
-	, MissionID(Other.MissionID)
+	: MissionID(Other.MissionID)
 	, DisplayName(Other.DisplayName)
 	, Description(Other.Description)
 	, Icon(Other.Icon)
@@ -39,9 +47,6 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 	, Rewards(Other.Rewards)
 	, bIsCompleted(Other.bIsCompleted)
 	{}
-
-	UPROPERTY()
-	FGuid InstanceID;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MissionRewardSystem")
 	FName MissionID;
@@ -66,8 +71,7 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 
 	bool operator==(const FMissionStruct& Other) const
 	{
-		// return MissionID == Other.MissionID;
-		return InstanceID == Other.InstanceID;
+		return MissionID == Other.MissionID;
 	}
 };
 
@@ -79,34 +83,13 @@ struct MISSIONREWARDSYSTEM_API FProgressedMissions
 	FProgressedMissions() = default;
 
 	FProgressedMissions(const FMissionStruct& InMission)
-	: InstanceID(InMission.InstanceID)
+	: MissionID(InMission.MissionID)
 	, ConditionsProgress(InMission.Conditions)
 	{}
 	
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MissionRewardSystem")
-	// FName MissionID;
-	
-	UPROPERTY()
-	FGuid InstanceID;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MissionRewardSystem")
+	FName MissionID;
 
 	UPROPERTY(BlueprintReadOnly, Category="MissionRewardSystem")
 	TArray<FMissionCondition> ConditionsProgress;
-};
-
-USTRUCT(BlueprintType)
-struct MISSIONREWARDSYSTEM_API FGrantedMission
-{
-	GENERATED_BODY()
-
-	FGrantedMission() {}
-	FGrantedMission(const TSoftClassPtr<class UMissionBase>& InClass, const FGuid InInstanceID)
-	: MissionClass(InClass)
-	, InstanceID(InInstanceID)
-	{}
-	
-	UPROPERTY()
-	TSoftClassPtr<class UMissionBase> MissionClass;
-	
-	UPROPERTY()
-	FGuid InstanceID;
 };
