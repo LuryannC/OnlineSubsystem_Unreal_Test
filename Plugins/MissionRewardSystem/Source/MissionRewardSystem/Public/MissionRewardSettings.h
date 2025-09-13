@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
 
 #pragma once
 
@@ -18,11 +18,12 @@ class MISSIONREWARDSYSTEM_API UMissionRewardSettings : public UDeveloperSettings
 public:
 	UMissionRewardSettings();
 	
-	/** List of mission PrimaryDataAssets loaded at startup */
+	/** List of mission loaded at startup. */
 	UPROPERTY(EditAnywhere, config, Category = "Sources")
 	TArray<TSoftObjectPtr<UMissionsAsset>> Missions;
 
-	/* If false subscribe to the save delegates in the subsystem and do your own custom logic with the data */
+	/** If false subscribe to the save delegates in the subsystem
+	 * and do your own custom logic with the data. */
 	UPROPERTY(EditAnywhere, config, Category = "Save")
 	bool bSaveLocally = true;
 	
@@ -32,6 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Save")
 	int32 SaveUserIndex = 0;
 
+	/** Show mission data whenever it is granted or updated.*/
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
 	bool bShowDebugMessages = false;
 };

@@ -1,3 +1,5 @@
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -66,7 +68,6 @@ struct MISSIONREWARDSYSTEM_API FMissionStruct
 
 	bool operator==(const FMissionStruct& Other) const
 	{
-		// return MissionID == Other.MissionID;
 		return InstanceID == Other.InstanceID;
 	}
 };
@@ -82,9 +83,6 @@ struct MISSIONREWARDSYSTEM_API FProgressedMissions
 	: InstanceID(InMission.InstanceID)
 	, ConditionsProgress(InMission.Conditions)
 	{}
-	
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MissionRewardSystem")
-	// FName MissionID;
 	
 	UPROPERTY()
 	FGuid InstanceID;
@@ -110,3 +108,23 @@ struct MISSIONREWARDSYSTEM_API FGrantedMission
 	UPROPERTY()
 	FGuid InstanceID;
 };
+
+USTRUCT(BlueprintType)
+struct MISSIONREWARDSYSTEM_API FCompletedMission
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FGuid InstanceID;
+
+	UPROPERTY(BlueprintReadOnly, Category="MissionRewardSystem")
+	FName MissionID;
+
+	UPROPERTY(BlueprintReadOnly, Category="MissionRewardSystem")
+	FMissionStruct MissionData;
+
+	FCompletedMission() {}
+	FCompletedMission(const FMissionStruct& InData)
+		: InstanceID(InData.InstanceID), MissionID(InData.MissionID), MissionData(InData) {}
+};
+

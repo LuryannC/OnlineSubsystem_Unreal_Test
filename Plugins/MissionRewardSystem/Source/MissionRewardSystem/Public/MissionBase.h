@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
 
 #pragma once
 
@@ -22,31 +22,29 @@ class MISSIONREWARDSYSTEM_API UMissionBase : public UObject
 public:
 	void InitialiseMission();
 
-	UFUNCTION()
+	/** Get the info about this mission, such as ID, Title, Description, etc...*/
+	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
 	FMissionStruct GetMissionData() const;
 
+	/** Get the conditions to complete info for this mission.*/
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	FMissionStruct BP_GetMissionData() const;
-	
-	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	void SetMissionCompleted();
-	
-	UFUNCTION()
-	void SetInstanceID(const FGuid& InID) { MissionData.InstanceID = InID; }
+	const TArray<FMissionCondition> GetMissionConditions() const { return MissionData.Conditions; }
 
-	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	TArray<FMissionCondition> GetMissionConditions() { return MissionData.Conditions; }
-
-	void UpdateRuntimeConditionsProgress(const TArray<FMissionCondition>& InMissionCondition);
-
-	/** Called by the subsystem whenever a gameplay event occurs */
-	void OnGameplayEvent(const FGameplayTag& EventTag, int32 Amount);
-	
+	/** Called whenever this mission conditions progress.*/
 	UPROPERTY(BlueprintAssignable)
 	FMissionProgressUpdated OnProgressUpdated;
 
+	/** Called when this mission is completed. */
 	UPROPERTY(BlueprintAssignable)
 	FMissionCompleted OnMissionCompleted;
+
+public:
+	// Called by the subsystem.
+	UFUNCTION()
+	void SetInstanceID(const FGuid& InID) { MissionData.InstanceID = InID; }
+	void UpdateRuntimeConditionsProgress(const TArray<FMissionCondition>& InMissionCondition);
+	void OnGameplayEvent(const FGameplayTag& EventTag, int32 Amount);
+	void SetMissionCompleted();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="MissionRewardSystem")

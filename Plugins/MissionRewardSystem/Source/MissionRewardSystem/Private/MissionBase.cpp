@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
 
 #include "MissionBase.h"
 #include "MissionRewardSettings.h"
@@ -25,11 +24,6 @@ void UMissionBase::InitialiseMission()
 }
 
 FMissionStruct UMissionBase::GetMissionData() const
-{
-	return MissionData;
-}
-
-FMissionStruct UMissionBase::BP_GetMissionData() const
 {
 	return MissionData;
 }
@@ -117,7 +111,8 @@ void UMissionBase::ShowMissionDebugData()
 		if (Settings->bShowDebugMessages)
 		{
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("---------------- MISSION ----------------"));
-			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission: %s"), *MissionData.MissionID.ToString());
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Instance ID: %s"), *MissionData.InstanceID.ToString());
+			UE_LOG(MissionRewardSystemLog, Log, TEXT("Mission ID: %s"), *MissionData.MissionID.ToString());
 			UE_LOG(MissionRewardSystemLog, Log, TEXT("Num of Conditions: %i"), MissionData.Conditions.Num());
 			for (const auto& Condition : MissionData.Conditions)
 			{

@@ -1,3 +1,5 @@
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
+
 #pragma once
 
 #include "CoreMinimal.h"

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
 
 #pragma once
 
@@ -13,7 +13,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionAdded, const UMissionBase*, MissionInstance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionCompleted, const FString&, CompletedMissionID);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRewardUnlocked, const FString&, CompletedMissionID, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRewardReceived, const FString&, CompletedMissionID);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionRewardSystemSaved, UMissionRewardSave*, SaveData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionRewardSystemLoaded, UMissionRewardSave*, SaveData);
@@ -31,52 +31,53 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	/* Method to give mission at runtime */
+	/** Grants a new mission.
+	 * @param MissionClass The mission class that will be granted.
+	 * @param bAllowDuplicates Should this mission be added if a similar exits? 
+	 */	
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
 	void GrantMission(TSoftClassPtr<UMissionBase> MissionClass, bool bAllowDuplicates = true);
 
-	/* Method to call whenever a gameplay event that has mission bound to it happen*/
-	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	void ReportGameplayEvent(const FGameplayTag& EventTag, int32 Amount = 1);
-
-	/* Load assets set in the plugin settings, such as:
-	 * Individual missions data asset and Seasonal missions data asset. 
+	/** Method to call whenever a gameplay event happens.
+	 * @param EventTag The reported event tag.
+	 * @param Amount How many it should be added to the progress count.
 	 */
-	void PreInitMissions(const TArray<UMissionsAsset*>& Assets);
+	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
+	void ReportGameplayEvent(const FGameplayTag& EventTag, const int32 Amount = 1);
 
-	/* In case developer wants to override the values, like retrieving from a cloud save. */
+	/** Manually save progress, in case 'bSaveLocally' is false in the plugin settings.
+	 * @param SaveData The save where the values should be saved to.
+	 */
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
 	void LoadProgress(UMissionRewardSave* SaveData);
 
-	/* Get all active missions */
+	/** Get all current active missions. */
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
 	const TArray<UMissionBase*>& GetActiveMissions() const;
 
-	/* Get the mission IDs (FName) of every completed mission */
+	/** Get all completed missions, which include its data. */
 	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	const TArray<FName>& GetCompletedMissionIDs() const { return CompletedMissionIDs; }
+	const TArray<FCompletedMission>& GetCompletedMissions() const { return CompletedMissions; }
 
-	/* Get the data for every completed mission */
-	UFUNCTION(BlueprintCallable, Category="MissionRewardSystem")
-	const TArray<FMissionStruct>& GetCompletedMissionData() const { return CompletedMissionData; }
-
-	/* Called whenever a mission is added to the player */
+	/** Called whenever a mission is added to the player. */
 	FOnMissionAdded OnMissionAdded;
 
-	/* Called upon completing a mission */
+	/** Called upon completing a mission. */
 	FOnMissionCompleted OnMissionCompleted;
 
-	/* Called when player receive the mission reward
-	 * It is also triggered in case it fails to give the reward */
-	FOnRewardUnlocked OnRewardUnlocked;
+	/** Called when the player receives the mission reward. */
+	FOnRewardReceived OnRewardReceived;
 
-	/* Called when mission save data file is loaded */
+	/** Called when mission save data file is successfully loaded. */
 	FOnMissionRewardSystemLoaded OnMissionRewardSystemLoaded;
 
-	/* Called when mission save data is saved */
+	/** Called when mission data is successfully saved.
+	 * If 'bSaveLocally' is false in the plugin settings,
+	 * use the broadcast save data to save it where it must be saved.
+	 */
 	FOnMissionRewardSystemSaved OnMissionRewardSystemSaved;
 	
-protected:
+private:
 	
 	UFUNCTION()
 	void HandleMissionCompleted(UMissionBase* Mission);
@@ -84,33 +85,25 @@ protected:
 	UFUNCTION()
 	void HandleMissionProgressUpdated(UMissionBase* Mission);
 
-private:	
 	void LoadMissions();
+	void PreInitMissionsFromAssets(const TArray<UMissionsAsset*>& Assets);
 	void InitMission(UMissionBase* InMission);
+	void LoadProgress();
+	void CommitSave() const;
+	void GiveMissionRewards(const UMissionBase* Mission);
+	void LoadRuntimeGrantedMissions();
 
 	TMultiMap<FGameplayTag, UMissionBase*> ListenerMap;
 
 	UPROPERTY()
-	TArray<TObjectPtr<UMissionBase>> ActiveMissions = TArray<TObjectPtr<UMissionBase>>();
+	TArray<TObjectPtr<UMissionBase>> ActiveMissions;
 
-	void LoadProgress();
-	void CommitSave() const;
-
-	void GiveMissionRewards(const UMissionBase* Mission);
-	
 	UPROPERTY()
-	TArray<FName> CompletedMissionIDs;
+	TArray<FGrantedMission> GrantedMissions;
+
+	UPROPERTY()
+	TArray<FCompletedMission> CompletedMissions;
 	
 	UPROPERTY()
 	TArray<FProgressedMissions> OnGoingMissionsProgress;
-	
-	UPROPERTY()
-	TArray<FGrantedMission> GrantedMissions;
-	// TArray<TSoftClassPtr<UMissionBase>> GrantedMissions;
-
-	UPROPERTY()
-	TArray<UMissionBase*> CompletedMissions;
-	
-	UPROPERTY()
-	TArray<FMissionStruct> CompletedMissionData;
 };

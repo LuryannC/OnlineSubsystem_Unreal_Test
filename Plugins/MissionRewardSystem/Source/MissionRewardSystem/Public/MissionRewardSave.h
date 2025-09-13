@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Made by Luryann A. Cervi. Please visit: https://luryanncervi.com.
 
 #pragma once
 
@@ -19,7 +19,8 @@ class MISSIONREWARDSYSTEM_API UMissionRewardSave : public USaveGame
 
 public:
 	UPROPERTY()
-	TArray<FName> CompletedMissionIDs;
+	TArray<FCompletedMission> CompletedMissions;
+	// TArray<FName> CompletedMissionIDs;
 	
 	UPROPERTY()
 	TArray<FProgressedMissions> OnGoingMissionsProgress;
